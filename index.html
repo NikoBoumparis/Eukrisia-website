@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eukrisia | Screening support for systematic reviews</title>
+<meta name="description" content="Eukrisia is software that supports screening in systematic reviews. Language models suggest decisions, and the review team makes them.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='3' fill='%237a2e2a'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='21' fill='%23ffffff' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #222222;
+    --ink-2: #4d4d4d;
+    --muted: #6e6e6e;
+    --line: #d9d9d9;
+    --band: #f3f3f1;
+    --accent: #7a2e2a;
+    --accent-soft: #f3e6e2;
+    --link: #1a4f8b;
+    --mark: #f5e2ae;
+    --paper-2: #f4f1ea;
+    --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --serif: Georgia, "Times New Roman", serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: #ffffff;
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16.5px;
+    line-height: 1.6;
+    border-top: 5px solid var(--accent);
+  }
+
+  a { color: var(--link); }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* Header and navigation */
+
+  .site-header { padding-top: 26px; padding-bottom: 18px; }
+
+  .site-name {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: normal;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .site-name a { color: var(--ink); text-decoration: none; }
+
+  .site-tagline {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .site-nav {
+    background: var(--band);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .site-nav a {
+    display: block;
+    padding: 9px 16px 9px 0;
+    margin-right: 8px;
+    color: var(--ink);
+    font-size: 15px;
+    text-decoration: none;
+  }
+
+  .site-nav a:hover { color: var(--accent); text-decoration: underline; }
+
+  /* Content */
+
+  main { padding: 10px 0 48px; }
+
+  .prose { max-width: 700px; }
+
+  h2 {
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 36px 0 10px;
+  }
+
+  p { margin: 0 0 14px; }
+
+  figure { margin: 26px 0 30px; }
+
+  .frame {
+    border: 1px solid var(--line);
+    overflow-x: auto;
+  }
+
+  .frame-pad { padding: 14px; }
+
+  .frame svg {
+    display: block;
+    width: 100%;
+    min-width: 600px;
+    height: auto;
+  }
+
+  figcaption {
+    max-width: 700px;
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+
+  .people { margin: 0; padding: 0; list-style: none; }
+  .people li { margin: 0 0 12px; }
+  .people strong { font-weight: 600; }
+
+  footer {
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13.5px;
+    padding: 16px 0 28px;
+  }
+
+  /* Figure 1 */
+
+  .fig text { font-family: var(--sans); fill: var(--ink); }
+  .fig .t-head { font-size: 15px; font-weight: 600; }
+  .fig .t-body { font-size: 13px; fill: var(--ink-2); }
+  .fig .t-small { font-size: 12px; fill: var(--muted); }
+  .fig .box { fill: #ffffff; stroke: #9c978c; stroke-width: 1.2; }
+  .fig .box-grey { fill: var(--paper-2); stroke: #9c978c; stroke-width: 1.2; }
+  .fig .box-human { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; }
+  .fig .line { fill: none; stroke: #6b6860; stroke-width: 1.3; }
+
+  /* Figure 2: app view built in HTML so the text wraps like the real interface */
+
+  .app {
+    min-width: 860px;
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.45;
+    color: #262626;
+    background: #ffffff;
+  }
+
+  .app-titlebar {
+    position: relative;
+    height: 30px;
+    background: #ececec;
+    border-bottom: 1px solid #d4d4d4;
+    text-align: center;
+    font-size: 12px;
+    line-height: 30px;
+    color: #6a6a6a;
+  }
+
+  .app-dots { position: absolute; left: 12px; top: 10px; line-height: 0; }
+
+  .app-dots i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cfcfcf;
+    margin-right: 6px;
+  }
+
+  .app-top {
+    display: flex;
+    align-items: center;
+    height: 46px;
+    padding: 0 16px;
+    border-bottom: 1px solid #e3e3e3;
+  }
+
+  .app-logo {
+    font-family: var(--serif);
+    font-size: 17px;
+    margin-right: 30px;
+  }
+
+  .app-tabs { display: flex; gap: 22px; height: 100%; }
+
+  .app-tabs span {
+    display: flex;
+    align-items: center;
+    color: #666666;
+    border-bottom: 2px solid transparent;
+  }
+
+  .app-tabs .on { color: #222222; border-bottom-color: var(--accent); font-weight: 600; }
+
+  .app-user {
+    margin-left: auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e3e8ee;
+    color: #3a4a5c;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .app-body {
+    display: grid;
+    grid-template-columns: 230px 1fr 280px;
+    min-height: 420px;
+  }
+
+  .app-list {
+    background: #fafafa;
+    border-right: 1px solid #e3e3e3;
+    padding: 14px 0 10px;
+  }
+
+  .app-list h4, .app-side h4 {
+    margin: 0 14px 2px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .app-progress { margin: 0 14px 12px; color: #777777; font-size: 12px; }
+
+  .app-bar {
+    height: 5px;
+    background: #e4e4e4;
+    border-radius: 3px;
+    margin-top: 5px;
+    overflow: hidden;
+  }
+
+  .app-bar b { display: block; width: 21%; height: 100%; background: var(--accent); }
+
+  .app-item {
+    padding: 8px 14px;
+    border-top: 1px solid #ececec;
+  }
+
+  .app-item.sel {
+    background: #ffffff;
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .app-item .t {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chip {
+    display: inline-block;
+    margin-top: 3px;
+    padding: 0 7px;
+    border-radius: 9px;
+    font-size: 11px;
+    line-height: 17px;
+  }
+
+  .chip.inc { background: #e4f1e8; color: #2b6b42; }
+  .chip.exc { background: #eeeeee; color: #555555; }
+  .chip.chk { background: #fbefd2; color: #7d5500; }
+  .chip.new { border: 1px solid #d6d6d6; color: #8a8a8a; line-height: 15px; }
+
+  .app-record { padding: 16px 22px; }
+
+  .app-meta { color: #888888; font-size: 12px; }
+
+  .app-record h3 {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: normal;
+    line-height: 1.3;
+    margin: 4px 0 4px;
+  }
+
+  .app-record .abs { font-size: 13.5px; line-height: 1.6; margin: 12px 0 0; color: #333333; }
+
+  .app-record mark { background: var(--mark); padding: 1px 0; color: inherit; }
+
+  .app-side {
+    border-left: 1px solid #e3e3e3;
+    padding: 14px 0 12px;
+    background: #fcfcfc;
+  }
+
+  .app-side .sub { margin: 0 14px 10px; color: #777777; font-size: 12px; }
+
+  .crit { list-style: none; margin: 0 14px; padding: 0; }
+
+  .crit li {
+    display: flex;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid #efefef;
+  }
+
+  .crit .ic {
+    flex: 0 0 18px;
+    height: 18px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 11px;
+    line-height: 18px;
+    font-weight: 700;
+  }
+
+  .ic.ok { background: #e4f1e8; color: #2b6b42; }
+  .ic.q { background: #fbefd2; color: #7d5500; }
+
+  .quote {
+    margin: 4px 0 0;
+    padding: 5px 8px;
+    background: #fff8e6;
+    border-left: 2px solid #d9b45a;
+    font-style: italic;
+    color: #555555;
+    font-size: 12px;
+  }
+
+  .decide { margin: 14px 14px 0; }
+
+  .decide .lbl { font-size: 12px; color: #777777; margin-bottom: 6px; }
+
+  .btns { display: flex; gap: 6px; }
+
+  .btns span {
+    flex: 1;
+    text-align: center;
+    padding: 5px 0;
+    border: 1px solid #cfcfcf;
+    border-radius: 4px;
+    background: #ffffff;
+    font-size: 12.5px;
+  }
+
+  .btns kbd {
+    font-family: var(--sans);
+    font-size: 10px;
+    color: #999999;
+    margin-left: 4px;
+  }
+
+  .reason {
+    margin-top: 8px;
+    padding: 5px 8px;
+    border: 1px solid #d6d6d6;
+    border-radius: 4px;
+    color: #9a9a9a;
+    font-size: 12px;
+  }
+
+  .app-status {
+    border-top: 1px solid #e3e3e3;
+    background: #f6f6f6;
+    padding: 5px 16px;
+    font-size: 11.5px;
+    color: #808080;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 560px) {
+    body { font-size: 16px; }
+    .site-name { font-size: 26px; }
+    .site-nav a { padding: 8px 12px 8px 0; margin-right: 4px; }
+    .frame-pad { padding: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="wrap site-header">
+  <p class="site-name"><a href="#">Eukrisia</a></p>
+  <p class="site-tagline">Screening support for systematic reviews</p>
+</header>
+
+<nav class="site-nav" aria-label="Main">
+  <div class="wrap">
+    <ul>
+      <li><a href="#about">About</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <div class="prose">
+    <h2 id="about">About</h2>
+    <p>Eukrisia supports title, abstract and full-text screening in systematic reviews. It uses language models to read each record against the review's eligibility criteria and to show reviewers the passages that bear on each criterion.</p>
+    <p>The review team stays in charge of the screening. People decide every record the software is unsure about, and they check a sample of what it proposes to exclude. Each decision can be traced to the person or step that made it.</p>
+    <p>We are working on Eukrisia continuously, so features and screens will change.</p>
+
+    <h2 id="how">How it works</h2>
+    <p>A review team imports its search results, enters its eligibility criteria and starts screening. For every record, Eukrisia suggests include, exclude or unsure and quotes the sentence it relied on. Reviewers see these suggestions next to the abstract and decide the records that need a person: unclear cases, conflicting suggestions and a random check of proposed exclusions.</p>
+  </div>
+
+  <figure>
+    <div class="frame frame-pad">
+        <svg class="fig" viewBox="0 0 900 440" role="img" aria-labelledby="f1-title f1-desc">
+          <title id="f1-title">Screening workflow</title>
+          <desc id="f1-desc">Records are imported and deduplicated. Model A and Model B screen each record independently and their decisions are compared. Records that either model includes or marks unsure go to full-text screening. Failed calls and disagreements go to a human reviewer. Records both models exclude are excluded, and a random sample of them is screened by a human to estimate how many eligible studies were missed.</desc>
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#6b6860"/>
+            </marker>
+            <marker id="arr-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#7a2e2a"/>
+            </marker>
+          </defs>
+
+          <!-- Import and deduplication -->
+          <rect class="box-grey" x="10" y="186" width="128" height="68" rx="3"/>
+          <text class="t-head" x="74" y="214" text-anchor="middle">Records</text>
+          <text class="t-body" x="74" y="234" text-anchor="middle">RIS import</text>
+
+          <rect class="box-grey" x="168" y="186" width="128" height="68" rx="3"/>
+          <text class="t-head" x="232" y="214" text-anchor="middle">Duplicates</text>
+          <text class="t-body" x="232" y="234" text-anchor="middle">removed, logged</text>
+
+          <path class="line" d="M138,220 H164" marker-end="url(#arr)"/>
+
+          <!-- Two independent arms -->
+          <rect class="box" x="330" y="104" width="142" height="68" rx="3"/>
+          <text class="t-head" x="401" y="132" text-anchor="middle">Model A</text>
+          <text class="t-body" x="401" y="152" text-anchor="middle">each criterion</text>
+
+          <rect class="box" x="330" y="268" width="142" height="68" rx="3"/>
+          <text class="t-head" x="401" y="296" text-anchor="middle">Model B</text>
+          <text class="t-body" x="401" y="316" text-anchor="middle">other provider</text>
+
+          <path class="line" d="M296,220 H312 V138 H326" marker-end="url(#arr)"/>
+          <path class="line" d="M312,220 V302 H326" marker-end="url(#arr)"/>
+          <text class="t-small" x="401" y="226" text-anchor="middle">screen independently</text>
+
+          <!-- Comparison -->
+          <rect class="box-grey" x="506" y="186" width="118" height="68" rx="3"/>
+          <text class="t-head" x="565" y="214" text-anchor="middle">Decisions</text>
+          <text class="t-body" x="565" y="234" text-anchor="middle">compared</text>
+
+          <path class="line" d="M472,138 H489 V206 H502" marker-end="url(#arr)"/>
+          <path class="line" d="M472,302 H489 V234 H502" marker-end="url(#arr)"/>
+
+          <!-- Outcomes -->
+          <rect class="box" x="664" y="20" width="226" height="104" rx="3"/>
+          <text class="t-head" x="678" y="46">Include or unsure</text>
+          <text class="t-body" x="678" y="66">by at least one model</text>
+          <text class="t-body" x="678" y="86">→ full-text screening</text>
+          <rect class="box-human" x="678" y="96" width="198" height="20" rx="2"/>
+          <text class="t-small" x="686" y="110" style="fill:#7a2e2a">disagreements go to a human</text>
+
+          <rect class="box-human" x="664" y="150" width="226" height="64" rx="3"/>
+          <text class="t-head" x="678" y="176">Model call failed</text>
+          <text class="t-body" x="678" y="196">human reviewer decides</text>
+
+          <rect class="box" x="664" y="240" width="226" height="186" rx="3"/>
+          <text class="t-head" x="678" y="266">Excluded by both models</text>
+          <text class="t-body" x="678" y="286">not read further, except for</text>
+          <rect class="box-human" x="678" y="298" width="198" height="114" rx="2"/>
+          <text class="t-body" x="690" y="320" style="fill:#7a2e2a;font-weight:600">random audit sample</text>
+          <text class="t-body" x="690" y="340">screened by a human</text>
+          <text class="t-body" x="690" y="366">→ estimate of missed</text>
+          <text class="t-body" x="690" y="384">studies with a 95%</text>
+          <text class="t-body" x="690" y="402">confidence interval</text>
+
+          <path class="line" d="M624,212 H640 V72 H660" marker-end="url(#arr)"/>
+          <path class="line" d="M640,182 H660" marker-end="url(#arr)"/>
+          <path class="line" d="M624,228 H640 V332 H660" marker-end="url(#arr)"/>
+
+          <!-- Legend -->
+          <rect class="box-grey" x="10" y="404" width="16" height="12" rx="2"/>
+          <text class="t-small" x="34" y="414">automatic step</text>
+          <rect class="box-human" x="140" y="404" width="16" height="12" rx="2"/>
+          <text class="t-small" x="164" y="414">human decision</text>
+        </svg>
+    </div>
+    <figcaption>Figure 1. The screening process. A person makes the decisions in the red boxes. Full-text screening follows the same steps.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>Figure 2 shows how a reviewer sees a single record. The suggestion and the quoted passage appear beside the abstract, and the reviewer's decision is the one that counts.</p>
+  </div>
+
+  <figure>
+    <div class="frame">
+      <div class="app" role="img" aria-label="Reviewer view of one invented record. A list of records on the left shows screening progress. The middle shows the title and abstract, with the phrase 'allocated by alternating weeks of enrolment' highlighted. The right panel shows the AI suggestion: three criteria are met, and study design is marked unclear with that quote. Below are buttons for the reviewer to include, exclude or mark unsure.">
+        <div aria-hidden="true">
+          <div class="app-titlebar"><span class="app-dots"><i></i><i></i><i></i></span>Eukrisia · Example review</div>
+          <div class="app-top">
+            <span class="app-logo">Eukrisia</span>
+            <div class="app-tabs">
+              <span>Records</span>
+              <span class="on">Title &amp; abstract</span>
+              <span>Full text</span>
+              <span>PRISMA</span>
+              <span>Log</span>
+            </div>
+            <span class="app-user">R1</span>
+          </div>
+
+          <div class="app-body">
+            <div class="app-list">
+              <h4>Records</h4>
+              <div class="app-progress">412 of 2,000 screened<div class="app-bar"><b></b></div></div>
+              <div class="app-item"><span class="t">Brief motivational intervention for cannabis users in primary care</span><span class="chip exc">Excluded</span></div>
+              <div class="app-item"><span class="t">Smartphone app to reduce cannabis use: a randomised trial</span><span class="chip inc">Included</span></div>
+              <div class="app-item sel"><span class="t">A guided web programme for cannabis use in young adults</span><span class="chip chk">To check</span></div>
+              <div class="app-item"><span class="t">Peer-led drug prevention in secondary schools</span><span class="chip exc">Excluded</span></div>
+              <div class="app-item"><span class="t">Trajectories of cannabis use from adolescence to adulthood</span><span class="chip exc">Excluded</span></div>
+              <div class="app-item"><span class="t">Text messaging for heavy drinking in students</span><span class="chip new">Not screened</span></div>
+              <div class="app-item"><span class="t">Online self-help for cannabis dependence</span><span class="chip new">Not screened</span></div>
+            </div>
+
+            <div class="app-record">
+              <div class="app-meta">Record 412</div>
+              <h3>A guided web programme for cannabis use in young adults: a controlled trial</h3>
+              <div class="app-meta">Author A, Author B, Author C · Journal of Example Studies · 2021</div>
+              <p class="abs">Background. Cannabis use is common in young adults, but few seek treatment. We compared a guided web programme with an information website. Methods. We enrolled 312 adults aged 18 to 30 who used cannabis at least weekly. Participants were <mark>allocated by alternating weeks of enrolment</mark> to the programme or the control site. The primary outcome was days of use in the past 30 days, measured after three months. Results. Participants in the programme reported fewer days of use than the control group.</p>
+            </div>
+
+            <div class="app-side">
+              <h4>AI suggestion</h4>
+              <div class="sub">Unsure: check study design</div>
+              <ul class="crit">
+                <li><span class="ic ok">✓</span><span>Adults who use cannabis</span></li>
+                <li><span class="ic ok">✓</span><span>Digital intervention</span></li>
+                <li><span class="ic ok">✓</span><span>Control condition</span></li>
+                <li><span class="ic q">?</span><span>Randomised controlled trial<span class="quote" style="display:block">"allocated by alternating weeks of enrolment"</span></span></li>
+              </ul>
+              <div class="decide">
+                <div class="lbl">Your decision</div>
+                <div class="btns"><span>Include<kbd>I</kbd></span><span>Exclude<kbd>E</kbd></span><span>Unsure<kbd>U</kbd></span></div>
+                <div class="reason">Reason (optional)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="app-status"><span>Saved</span><span>Every decision is recorded in the log</span></div>
+        </div>
+      </div>
+    </div>
+    <figcaption>Figure 2. The reviewer view of a single record. The record is invented for illustration.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>Full-text screening works the same way. Eukrisia finds open-access PDFs, accepts uploaded ones and reads scanned articles with text recognition. Every suggestion, decision and change is recorded, and the counts for the PRISMA 2020 flow diagram come from that record.</p>
+    <p>Eukrisia works with published titles, abstracts and articles. It is not meant for patient data or other confidential material.</p>
+
+    <h2 id="team">Team</h2>
+    <ul class="people">
+<li>
+  <strong>Nikolaos Boumparis</strong>, Senior Researcher 
+</li>
+<li><strong>Mark Grech</strong>, Software Developer </li>    </ul>
+
+    <h2 id="contact">Contact</h2>
+    <!-- Replace the placeholder address before publishing. -->
+    <p>Questions and comments are welcome at <a href="mailto:nikolaos@boumparis.com">nikolaos@boumparis.com</a>.</p>
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap">Eukrisia, 2026. Last updated 13 November 2026.</div>
+</footer>
+
+</body>
+</html>
